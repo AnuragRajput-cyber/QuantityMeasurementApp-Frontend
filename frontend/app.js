@@ -48,9 +48,25 @@ function checkTokenExpiry(token) {
 }
 
 function toggleDropdown() {
-  document.getElementById("dropdown").classList.toggle("hidden");
+  const dropdown = document.getElementById("dropdown");
+  if (dropdown) dropdown.classList.toggle("hidden");
 }
+function toggleHistory() {
+  const historyDiv = document.getElementById("history");
+  const btn = document.getElementById("historyToggle");
 
+  if (!historyDiv || !btn) return;
+
+  if (historyDiv.classList.contains("hidden-history")) {
+    historyDiv.classList.remove("hidden-history");
+    historyDiv.classList.add("show-history");
+    btn.innerText = "Hide";
+  } else {
+    historyDiv.classList.remove("show-history");
+    historyDiv.classList.add("hidden-history");
+    btn.innerText = "Show";
+  }
+}
 // 🔥 Logout (GLOBAL)
 function logout() {
   localStorage.removeItem("token");
@@ -59,6 +75,7 @@ function logout() {
 
 // 🔥 Main App
 class App {
+  
 
   constructor() {
     this.form = document.getElementById("form");
@@ -68,19 +85,36 @@ class App {
   }
 
   init() {
-    this.setUser();          // 👤 set user in header
-    this.loadCategories();
-    this.loadUnits();
+  this.setUser();
+  this.loadCategories();
+  this.loadUnits();
 
-    this.category.addEventListener("change", () => this.loadUnits());
+  // 🔥 ensure history hidden initially
+  const history = document.getElementById("history");
+  if (history) history.classList.add("hidden-history");
 
-    this.form.addEventListener("click", (e) => {
-      if (e.target.tagName === "BUTTON") {
-        e.preventDefault();
-        this.handleOperation(e.target.dataset.op);
-      }
-    });
-  }
+  const btn = document.getElementById("historyToggle");
+  if (btn) btn.innerText = "Show";
+
+  this.category.addEventListener("change", () => this.loadUnits());
+
+  this.form.addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON") {
+      e.preventDefault();
+      this.handleOperation(e.target.dataset.op);
+    }
+  });
+
+  // 🔥 close dropdown on outside click
+  document.addEventListener("click", (e) => {
+    const menu = document.querySelector(".user-menu");
+    const dropdown = document.getElementById("dropdown");
+
+    if (menu && dropdown && !menu.contains(e.target)) {
+      dropdown.classList.add("hidden");
+    }
+  });
+}
 
   // 👤 SET USER NAME FROM TOKEN
   setUser() {
@@ -129,7 +163,17 @@ class App {
       unit2.innerHTML += `<option>${u}</option>`;
     });
   }
+  static addHistory(entry) {
+  const history = document.getElementById("history");
 
+  if (!history.innerHTML) {
+    history.innerHTML = "";
+  }
+
+  history.innerHTML =
+    `<div class="history-item">${entry}</div>` +
+    history.innerHTML;
+}
   async handleOperation(op) {
     try {
 
@@ -159,14 +203,15 @@ class App {
       UI.showLoader();
 
       const result = await api.request(map[op], body);
-
-      UI.showResult(result, op);
+      const formatted = `${result.value} ${result.unit}`;
+      UI.showResult(formatted, op);
       UI.addHistory(`${op.toUpperCase()} → ${JSON.stringify(result)}`);
 
     } catch (err) {
       UI.showToast(err.message || "Operation failed");
     }
   }
+  
 }
 
 // 🚀 Start App

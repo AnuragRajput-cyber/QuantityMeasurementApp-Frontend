@@ -214,3 +214,29 @@ button:hover {
   background: #ef4444;
   color: white;
 }
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Hidden by default */
+.hidden-history {
+  display: none;
+}
+
+/* Visible */
+.show-history {
+  display: block;
+  margin-top: 10px;
+}
+
+/* Button style */
+#historyToggle {
+  background: #3b82f6;
+  color: white;
+}
+
+#historyToggle:hover {
+  background: #2563eb;
+}
